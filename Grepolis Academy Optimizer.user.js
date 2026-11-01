@@ -89,6 +89,12 @@
         return window.GameData?.researches || {};
     }
 
+    function getAcademyWindow() {
+        return [...document.querySelectorAll('.js-window-main-container.academy')]
+            .find(root => root.querySelector('.window_content .academy_image') &&
+                root.querySelector('.window_content .tech_tree_box.js-tech-tree')) || null;
+    }
+
     function getResearchState() {
         try {
             const town = window.ITowns?.getTown?.(getTownId());
@@ -99,26 +105,27 @@
         }
     }
 
-    function isQueued(id) {
-        return [...document.querySelectorAll('.js-queue-item.queued_building_order')]
+    function isQueued(id, academyWindow) {
+        return [...academyWindow.querySelectorAll('.js-queue-item.queued_building_order')]
             .some(item => item.classList.contains(id));
     }
 
-    function isResearchComplete(id, icon) {
+    function isResearchComplete(id, icon, academyWindow) {
         // Grepolis can leave `inactive` on the tree icon while an order is
         // queued. The town model and queue are authoritative when available;
         // otherwise the icon class distinguishes researched from unresearched.
-        if (getResearchState()[id] === true || isQueued(id)) return true;
+        if (getResearchState()[id] === true || isQueued(id, academyWindow)) return true;
         return Boolean(icon && !icon.classList.contains('inactive'));
     }
 
-    function saveAll(scope) {
+    function saveAll(scope, academyWindow) {
+        if (!academyWindow?.isConnected) return;
         const data = readTargets();
         const key = scope === 'city' ? getTownId() : getGroupId();
         const collection = scope === 'city'
             ? (data.cities[key] ||= {})
             : (data.groups[key] ||= {});
-        document.querySelectorAll(`.${CONTROL_CLASS}[data-research]`).forEach(control => {
+        academyWindow.querySelectorAll(`.tech_tree_box .${CONTROL_CLASS}[data-research]`).forEach(control => {
             collection[control.dataset.research] = control.dataset.target || '';
             control.classList.remove('ao-dirty');
         });
@@ -130,8 +137,7 @@
         const style = document.createElement('style');
         style.id = PANEL_ID + '_style';
         style.textContent = `
-            #${PANEL_ID} { position:absolute; right:30px; bottom:200px; z-index:999999; display:flex; justify-content:flex-end; gap:4px; margin:0; }
-            #${PANEL_ID} { position:absolute; right:30px; bottom:200px; z-index:999999; display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin:0; }
+            #${PANEL_ID} { position:absolute; right:30px; bottom:20px; z-index:999999; display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin:0; }
             #${PANEL_ID} button { min-width:78px; height:20px; padding:0 7px; border:1px solid #8a672c; border-radius:2px; background:#0F213A; color:wheat; font:bold 10px Arial,sans-serif; cursor:pointer; }
             #${PANEL_ID} button:hover { background:linear-gradient(#fff5d9,#e5cc91); color:#392810; }
             .${CONTROL_CLASS} { position:absolute !important; top:1px !important; right:1px !important; z-index:10000 !important; width:19px !important; height:19px !important; padding:0 !important; border:1px solid rgba(35,25,15,.75) !important; border-radius:3px !important; background:transparent !important; color:inherit !important; font:bold 12px/17px Arial,sans-serif !important; text-align:center !important; cursor:pointer !important; box-sizing:border-box !important; }
@@ -143,30 +149,30 @@
         document.head.appendChild(style);
     }
 
-    function createPanel() {
+    function createPanel(academyWindow) {
+        if (!academyWindow?.isConnected) return;
         let panel = document.getElementById(PANEL_ID);
         if (!panel) {
             panel = document.createElement('div');
             panel.id = PANEL_ID;
             panel.innerHTML = '<button type="button" class="ao-save-city">Save City</button><button type="button" class="ao-save-group">Save Group</button>';
-            panel.querySelector('.ao-save-city').addEventListener('click', () => saveAll('city'));
-            panel.querySelector('.ao-save-group').addEventListener('click', () => saveAll('group'));
+            panel.querySelector('.ao-save-city').addEventListener('click', () => saveAll('city', panel._academyWindow));
+            panel.querySelector('.ao-save-group').addEventListener('click', () => saveAll('group', panel._academyWindow));
         }
-        const host = document.querySelector('.js-window-main-container.academy .window_content') ||
-            document.querySelector('.window_content .tech_tree_box') ||
-            document.querySelector('.window_content');
+        const host = academyWindow.querySelector('.window_content .tech_tree_box.js-tech-tree');
         if (!host) return;
+        panel._academyWindow = academyWindow;
         if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
         if (panel.parentElement !== host) host.prepend(panel);
     }
 
-    function findResearchCards() {
+    function findResearchCards(academyWindow) {
         const data = researchData();
         const cards = new Map();
         // Only decorate the research tree. The same research icon is also
         // rendered in the queue, where it must not replace the tree card in
         // the ID map or receive a second target control.
-        document.querySelectorAll('.tech_tree_box .research_box > .research_icon').forEach(icon => {
+        academyWindow.querySelectorAll('.tech_tree_box .research_box > .research_icon').forEach(icon => {
             const card = icon.closest('.research_box') || icon.parentElement;
             if (!card) return;
 
@@ -184,7 +190,8 @@
             }
             const id = actionId || exactId || iconId;
             if (!id || ['inactive', 'research'].includes(id)) return;
-            cards.set(id, { card, icon, research: data[id] || null });
+            const research = data[id] || data[actionId] || data[iconId] || null;
+            cards.set(id, { card, icon, research });
         });
         return cards;
     }
@@ -192,7 +199,8 @@
     function updateControl(control) {
         const id = control.dataset.research;
         const target = control.dataset.target === 'yes';
-        const researched = isResearchComplete(id, control._aoResearchIcon);
+        const academyWindow = control.closest('.js-window-main-container.academy');
+        const researched = isResearchComplete(id, control._aoResearchIcon, academyWindow);
         control.classList.remove('ao-match', 'ao-mismatch', 'ao-unmarked-done');
         control.textContent = target ? '✓' : '□';
         if (target && researched) control.classList.add('ao-match');
@@ -202,8 +210,8 @@
         control.setAttribute('aria-label', control.title);
     }
 
-    function createControls() {
-        for (const [id, info] of findResearchCards()) {
+    function createControls(academyWindow) {
+        for (const [id, info] of findResearchCards(academyWindow)) {
             let control = info.card.querySelector(`.${CONTROL_CLASS}[data-research="${CSS.escape(id)}"]`);
             if (!control) {
                 control = document.createElement('button');
@@ -242,12 +250,18 @@
     function watcher() {
         const data = researchData();
         if (!Object.keys(data).length) return;
+        const academyWindow = getAcademyWindow();
+        if (!academyWindow) return;
+        // Clear controls left outside the Academy by an earlier global version.
+        document.querySelectorAll(`.${CONTROL_CLASS}`).forEach(control => {
+            if (!academyWindow.contains(control)) control.remove();
+        });
         injectStyle();
-        createPanel();
+        createPanel(academyWindow);
         const townId = getTownId();
         const groupId = getGroupId();
         if (townId !== lastTownId || groupId !== lastGroupId) {
-            document.querySelectorAll(`.${CONTROL_CLASS}`).forEach(control => {
+            academyWindow.querySelectorAll(`.tech_tree_box .${CONTROL_CLASS}`).forEach(control => {
                 const saved = getTarget(control.dataset.research);
                 control.dataset.target = saved === 'yes' || saved === 'no' ? saved : '';
                 control.classList.remove('ao-dirty');
@@ -255,7 +269,7 @@
             lastTownId = townId;
             lastGroupId = groupId;
         }
-        createControls();
+        createControls(academyWindow);
     }
 
     setInterval(watcher, 500);
