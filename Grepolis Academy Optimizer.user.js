@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Grepolis Academy Optimizer
-// @version      1.0
+// @version      1.0.1
 // @include      https://*.grepolis.com/game/*
 // @author       Acilar
 // @description  Set yes/no research targets for each city or town group
+// @downloadURL  https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/main/Grepolis%20Academy%20Optimizer.user.js
+// @updateURL    https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/main/Grepolis%20Academy%20Optimizer.user.js
 // @grant        none
 // ==/UserScript==
 
@@ -140,7 +142,7 @@
             #${PANEL_ID} { position:absolute; right:30px; bottom:20px; z-index:999999; display:flex; flex-direction:column; align-items:flex-end; gap:4px; margin:0; }
             #${PANEL_ID} button { min-width:78px; height:20px; padding:0 7px; border:1px solid #8a672c; border-radius:2px; background:#0F213A; color:wheat; font:bold 10px Arial,sans-serif; cursor:pointer; }
             #${PANEL_ID} button:hover { background:linear-gradient(#fff5d9,#e5cc91); color:#392810; }
-            .${CONTROL_CLASS} { position:absolute !important; top:1px !important; right:1px !important; z-index:10000 !important; width:19px !important; height:19px !important; padding:0 !important; border:1px solid rgba(35,25,15,.75) !important; border-radius:3px !important; background:transparent !important; color:inherit !important; font:bold 12px/17px Arial,sans-serif !important; text-align:center !important; cursor:pointer !important; box-sizing:border-box !important; }
+            .${CONTROL_CLASS} { position:absolute !important; top:1px !important; right:1px !important; z-index:10000 !important; width:19px !important; height:19px !important; padding:0 !important; border:1px solid #7a5730 !important; border-radius:2px !important; background:rgba(18,30,42,0.94) !important; color:#f5d7a1 !important; font:bold 11px/18px Arial,sans-serif !important; text-align:center !important; line-height:18px !important; cursor:pointer !important; }
             .${CONTROL_CLASS}.ao-match { background:#bfe49a !important; color:#225d08 !important; }
             .${CONTROL_CLASS}.ao-mismatch { background:#efaaa0 !important; color:#8d1008 !important; }
             .${CONTROL_CLASS}.ao-unmarked-done { background:#f2c36f !important; color:#754400 !important; }
