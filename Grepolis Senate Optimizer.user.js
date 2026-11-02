@@ -4,8 +4,6 @@
 // @include      https://*.grepolis.com/game/*
 // @author       Acilar
 // @description  Provides a building target interface
-// @updateURL    https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/refs/heads/main/Grepolis%20Senate%20Optimizer.user.js
-// @downloadURL  https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/refs/heads/main/Grepolis%20Senate%20Optimizer.user.js
 // @grant        none
 // ==/UserScript==
 
