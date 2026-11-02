@@ -4,6 +4,8 @@
 // @include      https://*.grepolis.com/game/*
 // @author       Acilar
 // @description  Set yes/no research targets for each city or town group
+// @updateURL    https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/refs/heads/main/Grepolis%20Academy%20Optimizer.user.js
+// @downloadURL  https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/refs/heads/main/Grepolis%20Academy%20Optimizer.user.js
 // @grant        none
 // ==/UserScript==
 
