@@ -1,1 +1,0 @@
-# Grepolis-Senate-Optimizer
