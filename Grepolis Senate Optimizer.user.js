@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Grepolis Senate Optimizer
-// @version      1.0
+// @version      1.0.1
 // @include      https://*.grepolis.com/game/*
 // @author       Acilar
 // @description  Provides a building target interface
+// @downloadURL  https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/main/Grepolis%20Senate%20Optimizer.user.js
+// @updateURL    https://raw.githubusercontent.com/AcilarHub/Grepolis-City-Planning/main/Grepolis%20Senate%20Optimizer.user.js
 // @grant        none
 // ==/UserScript==
 
